@@ -2,26 +2,50 @@ import React, { useState } from "react";
 import ItemForm from "./ItemForm";
 import Filter from "./Filter";
 import Item from "./Item";
+import { v4 } from "uuid";
 
-function ShoppingList({ items }) {
+function ShoppingList({ items, setItems }) {
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [search, setSearch] = useState("");
+
+  function onItemFormSubmit(newItem) {
+    setItems([...items, newItem]);
+  }
+
+  function handleSearchChange(event) {
+    setSearch(event.target.value);
+    console.log(event.target.value);
+  }
 
   function handleCategoryChange(event) {
     setSelectedCategory(event.target.value);
   }
 
-  const itemsToDisplay = items.filter((item) => {
-    if (selectedCategory === "All") return true;
+  const itemsToDisplayBySearch =
+    search === ""
+      ? [...items]
+      : items.filter((item) =>
+          item.name.toLowerCase().includes(search.toLowerCase())
+        );
 
-    return item.category === selectedCategory;
-  });
+  const itemsToDisplayBySearchAndCategory =
+    selectedCategory === "All"
+      ? [...itemsToDisplayBySearch]
+      : itemsToDisplayBySearch.filter(
+          (item) => item.category === selectedCategory
+        );
+  console.log(itemsToDisplayBySearchAndCategory);
 
   return (
     <div className="ShoppingList">
-      <ItemForm />
-      <Filter onCategoryChange={handleCategoryChange} />
+      <ItemForm onItemFormSubmit={onItemFormSubmit} />
+      <Filter
+        onCategoryChange={handleCategoryChange}
+        onSearchChange={handleSearchChange}
+        search={search}
+      />
       <ul className="Items">
-        {itemsToDisplay.map((item) => (
+        {itemsToDisplayBySearchAndCategory.map((item) => (
           <Item key={item.id} name={item.name} category={item.category} />
         ))}
       </ul>
